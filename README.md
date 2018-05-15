@@ -16,8 +16,8 @@ Here are the specific user stories you should implement for this project:
 <b>Pro Tip:</b> Checkout this <a href="https://forum.freecodecamp.org/t/guide-for-using-mongodb-and-deploying-to-heroku/19347">wiki article</a> for tips on integrating MongoDB on Glitch.
 
 <b>Example URL creation usage:</b><br>
-<code>https://ms1-url-micro.glitch.me/new-url/https://www.google.com</code><br>
-<code>https://ms1-url-micro.glitch.me/new-url/http://foo.com:80</code><br>
+<code>https://ms1-url-micro.glitch.me/api/url/https://www.google.com</code><br>
+<code>https://ms1-url-micro.glitch.me/api/url/http://foo.com:80</code><br>
 
 <b>Example URL creation output:</b><br>
 <code>{ "original_url":"http://foo.com:80", "short_url":"https://ms1-url-micro.glitch.me/8170" }</code>
