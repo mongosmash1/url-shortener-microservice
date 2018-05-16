@@ -6,6 +6,12 @@ const port = process.env.PORT;
 const datastore = require('./datastore.js'); // mongodb datastore
 const validUrl = require('valid-url'); // to check for url validity
 
+var mongoResults = function(err, res) {
+  console.log(res);
+  let results = res;
+  return results;
+}
+
 app.use('/public', express.static(process.cwd() + '/public'));
 
 // serves static file by default containing instructions to use this microservice
@@ -18,16 +24,17 @@ app.route('/')
 app.route('/:urlCode')
   .get(function(req, res) {
     let urlCode = req.params.urlCode;
-    // if short code doesn't exist, return error
-    if (!datastore.getCode(urlCode)) {
-      res.status(404);
-      res.type('txt').send('Record Not Found');
-    }
-    // else redirect to stored url
-    else {
-      let redirectToUrl = datastore.getCode(urlCode).original_url;
+    // redirects to stored url if it exists
+    datastore.query('urlCode', urlCode, function(err, doc) {
+      if (err) throw err;
+      if (!doc) {
+        res.status(404);
+        res.type('txt').send('No record found for that shortened URL');
+      } else {
+      let redirectToUrl = doc.urlTarget;
       res.redirect(redirectToUrl);
-    }
+      }
+    });
   });
 
 // create shortened url
@@ -40,13 +47,13 @@ app.route('/api/url/*')
         shortURL = 'Not a valid URI';
     }
     // if submitted URI is already in the database, return existing value
-    else if (datastore.getOriginal(originalURL)) {
-      shortURL += datastore.getOriginal(originalURL).code;
+    else if (datastore.query(originalURL)) {
+      shortURL += datastore.getOriginal(originalURL)[0]['urlCode'];
     }
     // else create and store random 8 character string (a-z)(0-9)
     else {
-      datastore.createUrl(originalURL, shortURL);
-      shortURL += datastore.getOriginal(originalURL).code;
+      datastore.createUrl(originalURL);
+      shortURL += datastore.getOriginal(originalURL)[0]['urlCode'];
     }
     // return json response
     res.json({ original_url: originalURL, short_url: shortURL });
