@@ -6,48 +6,50 @@ const MONGODB_URI = 'mongodb://'+process.env.USER+':'+process.env.PASS+'@'+proce
 const crypto = require('crypto');
 
 //
-// document schema is { _id, original_url, code, short_url }
+// document schema = {
+//   urlCode, (8 digit alphanumeric code)
+//   urlTarget (url of website that code redirects to)
+// }
 //
 
 
-exports.getOriginal = function () {
+exports.query = function (key, value, callback) {
   mongo.connect(MONGODB_URI, function(err, client) {
     if (err) throw err;
     const db = client.db(process.env.DB);
     const url = db.collection(process.env.COLLECTION);
-    // this find needs some work, not sure toArry is necessary, JSON would be better
-    url.find({}).toArray(function (err, url){
-      if (err) throw err;
-      return url;
+    var query = {};
+    query[key] = value;
+    console.log(query);
+    url.find(query).project({ _id: 0, urlCode: 1, urlTarget: 1 }).toArray(function (err, docs){
+      console.log(docs);
+      if (err) {
+        client.close;
+        callback(err);
+      } else {
+      let results = docs[0];
+      callback(null, results);
       client.close;
+      }
     });
   });
 }
 
-exports.getCode = function () {
+exports.createUrl = function (urlTarget) {
   mongo.connect(MONGODB_URI, function(err, client) {
     if (err) throw err;
     const db = client.db(process.env.DB);
     const url = db.collection(process.env.COLLECTION);
-    // this find needs some work, not sure toArry is necessary, JSON would be better
-    url.find({}).toArray(function (err, url){
-      if (err) throw err;
-      return url;
-      client.close;
-    });
-  });
-}
-
-exports.createUrl = function (orig, short) {
-  mongo.connect(MONGODB_URI, function(err, client) {
-    if (err) throw err;
-    const db = client.db(process.env.DB);
-    const url = db.collection(process.env.COLLECTION);
-    let original_url = orig;
-    let short_url = short;
-    let code = generateCode(8);
-    // but if newly randomized code already exists, create a new code
+    // at some point should add logic to check if 8 digit code is unique in the database
+    let urlCode = generateCode(8);
     // create document only
+    var doc = { 'urlCode': urlCode, 'urlTarget': urlTarget };
+    url.insert(doc, function(err, doc) {
+      console.log(doc);
+      if (err) throw err;
+      // console.log(JSON.stringify(doc));
+      client.close();
+    });
   });
 }
 
