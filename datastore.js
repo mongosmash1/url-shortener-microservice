@@ -13,7 +13,7 @@ const crypto = require('crypto');
 //
 
 
-exports.query = function (key, value, callback) {
+exports.get = function (key, value, callback) {
   mongo.connect(MONGODB_URI, function(err, client) {
     if (err) throw err;
     const db = client.db(process.env.DB);
@@ -22,20 +22,20 @@ exports.query = function (key, value, callback) {
     query[key] = value;
     console.log(query);
     url.find(query).project({ _id: 0, urlCode: 1, urlTarget: 1 }).toArray(function (err, docs){
-      console.log(docs);
       if (err) {
         client.close;
         callback(err);
       } else {
-      let results = docs[0];
-      callback(null, results);
-      client.close;
+        let results = docs[0];
+        console.log(results);
+        callback(null, results);
+        client.close;
       }
     });
   });
 }
 
-exports.createUrl = function (urlTarget) {
+exports.put = function (urlTarget) {
   mongo.connect(MONGODB_URI, function(err, client) {
     if (err) throw err;
     const db = client.db(process.env.DB);
@@ -45,9 +45,7 @@ exports.createUrl = function (urlTarget) {
     // create document only
     var doc = { 'urlCode': urlCode, 'urlTarget': urlTarget };
     url.insert(doc, function(err, doc) {
-      console.log(doc);
       if (err) throw err;
-      // console.log(JSON.stringify(doc));
       client.close();
     });
   });

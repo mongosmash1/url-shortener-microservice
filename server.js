@@ -25,7 +25,7 @@ app.route('/:urlCode')
   .get(function(req, res) {
     let urlCode = req.params.urlCode;
     // redirects to stored url if it exists
-    datastore.query('urlCode', urlCode, function(err, doc) {
+    datastore.get('urlCode', urlCode, function(err, doc) {
       if (err) throw err;
       if (!doc) {
         res.status(404);
@@ -37,6 +37,7 @@ app.route('/:urlCode')
     });
   });
 
+
 // create shortened url
 app.route('/api/url/*')
   .get(function(req, res) {
@@ -46,17 +47,25 @@ app.route('/api/url/*')
     if (!validUrl.isWebUri(originalURL)){
         shortURL = 'Not a valid URI';
     }
-    // if submitted URI is already in the database, return existing value
-    else if (datastore.query(originalURL)) {
-      shortURL += datastore.getOriginal(originalURL)[0]['urlCode'];
-    }
-    // else create and store random 8 character string (a-z)(0-9)
-    else {
-      datastore.createUrl(originalURL);
-      shortURL += datastore.getOriginal(originalURL)[0]['urlCode'];
-    }
-    // return json response
-    res.json({ original_url: originalURL, short_url: shortURL });
+    // check if submitted URL is already in the database
+    datastore.get('urlTarget', originalURL, function(err, doc) {
+      if (err) throw err;
+      if (doc) {
+        originalURL = doc.urlTarget;
+        shortURL += doc.urlCode;
+        res.json({ original_url: originalURL, short_url: shortURL });
+      } else {
+        datastore.put(originalURL);
+        datastore.get('urlTarget', originalURL, function(err, doc) {
+          if (err) throw err;
+          if (doc) {
+            originalURL = doc.urlTarget;
+            shortURL += doc.urlCode;
+            res.json({ original_url: originalURL, short_url: shortURL });
+          }
+        });
+      }
+    });
   });
 
 // respond not found for all invalid routes
