@@ -45,15 +45,19 @@ app.route('/api/url/*')
     let shortURL = 'https://ms1-url-micro.glitch.me/';
     // if invalid URI submitted, return json error
     if (!validUrl.isWebUri(originalURL)){
-        shortURL = 'Not a valid URI';
+      res.status(400);
+      res.type('txt').send('Bad Request: "' + originalURL + '" is not a valid URL');
+      res.end;
     }
     // check if submitted URL is already in the database
-    datastore.get('urlTarget', originalURL, function(err, doc) {
+    else {
+      datastore.get('urlTarget', originalURL, function(err, doc) {
       if (err) throw err;
       if (doc) {
         originalURL = doc.urlTarget;
         shortURL += doc.urlCode;
         res.json({ original_url: originalURL, short_url: shortURL });
+        // if new URL, create and code and return json
       } else {
         datastore.put(originalURL);
         datastore.get('urlTarget', originalURL, function(err, doc) {
@@ -66,6 +70,7 @@ app.route('/api/url/*')
         });
       }
     });
+    }
   });
 
 // respond not found for all invalid routes

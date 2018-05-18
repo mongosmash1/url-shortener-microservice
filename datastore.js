@@ -20,14 +20,12 @@ exports.get = function (key, value, callback) {
     const url = db.collection(process.env.COLLECTION);
     var query = {};
     query[key] = value;
-    console.log(query);
     url.find(query).project({ _id: 0, urlCode: 1, urlTarget: 1 }).toArray(function (err, docs){
       if (err) {
         client.close;
         callback(err);
       } else {
         let results = docs[0];
-        console.log(results);
         callback(null, results);
         client.close;
       }

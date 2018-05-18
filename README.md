@@ -20,11 +20,11 @@ Here are the specific user stories you should implement for this project:
 <code>https://ms1-url-micro.glitch.me/api/url/http://foo.com:80</code><br>
 
 <b>Example URL creation output:</b><br>
-<code>{ "original_url":"http://foo.com:80", "short_url":"https://ms1-url-micro.glitch.me/8170" }</code>
+<code>{ "original_url":"http://foo.com:80", "short_url":"https://ms1-url-micro.glitch.me/ff6c4a0b" }</code>
 
 
 <b>Example URL usage</b><br>
-<code>https://ms1-url-micro.glitch.me/2871</code>
+<code>https://ms1-url-micro.glitch.me/290b2b60</code>
 
 <b>Example URL redirects to</b><br>
 <code>https://www.google.com</code>
